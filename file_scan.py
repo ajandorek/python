@@ -42,7 +42,8 @@ if is_valid:
     stop = time.perf_counter()
     walkpath(args.filepath, args.regexp)
     pp.pprint(matches)
+
     print("Elapsed time during the whole program in seconds:",
-        stop - start)
+          stop - start)
 else:
     print('Please Enter a valid Regular Expression')
