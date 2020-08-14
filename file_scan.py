@@ -4,22 +4,22 @@ import re
 import time
 import pprint
 
-start = time.perf_counter()
-pp = pprint.PrettyPrinter(indent=4)
+START = time.perf_counter()
+PP = pprint.PrettyPrinter(indent=4)
 
-parser = argparse.ArgumentParser(
+PARSER = argparse.ArgumentParser(
     description="Lists all files in a filepath that matches a regex string")
-parser.add_argument("filepath", type=str, help="Enter a filepath")
-parser.add_argument("regexp", type=str, help="Enter regexp string to match")
-args = parser.parse_args()
+PARSER.add_argument("filepath", type=str, help="Enter a filepath")
+PARSER.add_argument("regexp", type=str, help="Enter regexp string to match")
+ARGS = PARSER.parse_args()
 
-matches = []
+MATCHES = []
 
 try:
-    re.compile(args.regexp)
-    is_valid = True
+    re.compile(ARGS.regexp)
+    IS_VALID = True
 except re.error:
-    is_valid = False
+    IS_VALID = False
 
 
 def walkpath(dirname, string_to_match):
@@ -33,17 +33,20 @@ def walkpath(dirname, string_to_match):
                 match = string_to_match.search(data)
                 file.close()
                 if match:
-                    matches.append(pathname)
+                    MATCHES.append(pathname)
         else:
             walkpath(pathname, string_to_match)
 
 
-if is_valid:
-    stop = time.perf_counter()
-    walkpath(args.filepath, args.regexp)
-    pp.pprint(matches)
+if IS_VALID:
+    STOP = time.perf_counter()
+    walkpath(ARGS.filepath, ARGS.regexp)
+    if len(MATCHES) > 0:
+        PP.pprint(MATCHES)
+    else: 
+        print('No Matches Found')
 
     print("Elapsed time during the whole program in seconds:",
-          stop - start)
+          STOP - START)
 else:
     print('Please Enter a valid Regular Expression')
