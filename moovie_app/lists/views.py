@@ -14,10 +14,14 @@ from lists.models import Genre, Movie
 
 
 class GenreViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 class MovieViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     filter_backends = [filters.SearchFilter,
@@ -37,18 +41,10 @@ class MovieViewSet(viewsets.ModelViewSet):
         return queryset
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     queryset = get_user_model().objects.all()
     serializer_class = GetUsersSerializers
-
-def send_email():
-        email = EmailMessage(
-            'Title',
-            (CreateUserSerializer.name, CreateUserSerializer.email),
-            'my-email',
-            ['my-receive-email']
-        )
-        email.attach_file(CreateUserSerializer.file)
-        email.send()
 
 class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = get_user_model().objects.all()

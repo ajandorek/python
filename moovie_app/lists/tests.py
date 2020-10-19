@@ -1,17 +1,20 @@
 from django.test import TestCase
 from django.urls import reverse
 from lists.models import Genre, Movie
+from django.contrib.auth.models import User
 from lists.views import GenreViewSet
-from rest_framework.test import APIRequestFactory, APITestCase
+from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 from rest_framework.views import status
 from model_bakery import baker
 import datetime
+from faker import Faker
+
+fake = Faker()
+email = fake.email
 
 # Create your tests here.
 
 # Genre Tests
-
-
 class GenreTestCase(TestCase):
     def test_genre(self):
         self.assertEquals(Genre.objects.count(), 0)
@@ -23,6 +26,8 @@ class GenreAPIViewTest(APITestCase):
     def setUp(self) -> None:
         self.url = reverse('genre-list')
         self.genre = baker.make(Genre, name='Comedy')
+        self.user = baker.make(User, username='username', email=email, password='username')
+        self.client.force_authenticate(user=self.user)
 
     def test_genre_create_api(self):
         self.assertEquals(Genre.objects.count(), 1)
@@ -69,6 +74,7 @@ class MovieTestCase(TestCase):
         baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
                    poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[genre])
         self.assertEquals(Genre.objects.count(), 1)
+        
 
 
 class MovieAPIViewTest(APITestCase):
@@ -77,6 +83,8 @@ class MovieAPIViewTest(APITestCase):
         self.genre = baker.make(Genre, name='Comedy')
         self.movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
                                 poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[self.genre])
+        self.user = baker.make(User, username='username', email=email, password='username')
+        self.client.force_authenticate(user=self.user)
 
     def test_movie_create_api(self):
         self.assertEquals(Movie.objects.count(), 1)
