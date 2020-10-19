@@ -2,25 +2,23 @@ from django.test import TestCase
 from django.urls import reverse
 from lists.models import Genre
 from lists.views import GenreViewSet
-from faker import Faker
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import status
+from model_bakery import baker
 
 # Create your tests here.
-
-fake = Faker()
 
 # Genre Tests
 class GenreTestCase(TestCase):
   def test_genre(self):
     self.assertEquals(Genre.objects.count(), 0)
-    Genre.objects.create(name='Action')
+    baker.make(Genre, name='Action')
     self.assertEquals(Genre.objects.count(), 1)
 
 class GenreAPIViewTest(APITestCase):
   def setUp(self) -> None:
     self.url = reverse('genre-list')
-    self.genre = Genre.objects.create(name='Comedy')
+    self.genre = baker.make(Genre, name='Comedy')
 
   def test_genre_create_api(self):
     self.assertEquals(Genre.objects.count(), 1)

@@ -12,3 +12,4 @@ from lists.models import Genre
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    
