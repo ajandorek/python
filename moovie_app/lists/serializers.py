@@ -10,4 +10,4 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
 class MovieSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Movie
-        fields = ('id', 'title', 'tagline', 'overview', 'release_date', 'poster_url', 'backdrop_url', 'imdb_id', 'genre')
+        fields = ('id', 'title', 'tagline', 'overview', 'release_date', 'poster_url', 'backdrop_url', 'imdb_id', 'genres')

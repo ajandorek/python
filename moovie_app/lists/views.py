@@ -16,7 +16,6 @@ class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
-
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
@@ -28,10 +27,10 @@ class MovieViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Movie.objects.all()
-        genre = self.request.query_params.get('genres', None)
+        genres = self.request.query_params.get('genres', None)
         title = self.request.query_params.get('title', None)
-        if genre is not None:
-            queryset = queryset.filter(genre=genre)
+        if genres is not None:
+            queryset = queryset.filter(genres__name=genres)
         elif title is not None:
-            queryset = queryset.filter(title=title)
+            queryset = queryset.filter(title__contains=title)
         return queryset

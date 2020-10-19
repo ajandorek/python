@@ -8,9 +8,10 @@ class Genre(models.Model):
 
     class Meta:
         ordering = ('id', )
-    
+
     def __str__(self):
         return f'{self.name}'
+
 
 class Movie(models.Model):
     title = models.CharField(max_length=50)
@@ -20,11 +21,10 @@ class Movie(models.Model):
     poster_url = models.CharField(max_length=100)
     backdrop_url = models.CharField(max_length=100)
     imdb_id = models.CharField(max_length=10)
-    genre = models.ForeignKey(
-        Genre, on_delete=models.PROTECT, to_field='name')
+    genres = models.ManyToManyField(Genre)
 
     class Meta:
         ordering = ('id', )
-    
+
     def __str__(self):
         return f'{self.title}{self.id}{self.genre}{self.imdb_id}'
