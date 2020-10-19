@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
+
+env = environ.Env(
+    EMAIL=(str, ''),
+    EMAIL_PASSWORD=(str, '')
+)
+
+environ.Env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +48,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'lists.apps.ListsConfig'
 ]
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = env('EMAIL')
+EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD')
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False 
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -123,5 +138,9 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    "DEFAULT_AUTHENTICATION_CLASSES": [                             
+        "rest_framework.authentication.SessionAuthentication",      
+        "rest_framework_simplejwt.authentication.JWTAuthentication", 
+    ],
 }

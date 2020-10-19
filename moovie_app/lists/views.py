@@ -3,10 +3,11 @@ from rest_framework import permissions, renderers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import django_filters.rest_framework
-from rest_framework import filters
+from rest_framework import filters, mixins
+from django.contrib.auth import get_user_model
+from django.core.mail import EmailMessage
 
-
-from lists.serializers import GenreSerializer, MovieSerializer
+from lists.serializers import GenreSerializer, MovieSerializer, CreateUserSerializer, GetUsersSerializers
 from lists.models import Genre, Movie
 
 # Create your views here.
@@ -34,3 +35,21 @@ class MovieViewSet(viewsets.ModelViewSet):
         elif title is not None:
             queryset = queryset.filter(title__contains=title)
         return queryset
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = get_user_model().objects.all()
+    serializer_class = GetUsersSerializers
+
+def send_email():
+        email = EmailMessage(
+            'Title',
+            (CreateUserSerializer.name, CreateUserSerializer.email),
+            'my-email',
+            ['my-receive-email']
+        )
+        email.attach_file(CreateUserSerializer.file)
+        email.send()
+
+class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    queryset = get_user_model().objects.all()
+    serializer_class = CreateUserSerializer
