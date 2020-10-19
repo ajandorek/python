@@ -8,8 +8,6 @@ from rest_framework.views import status
 
 # Create your tests here.
 
-fake = Faker()
-
 # Genre Tests
 class GenreTestCase(TestCase):
   def test_genre(self):

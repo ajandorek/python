@@ -6,6 +6,7 @@ from lists import views
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'genres', views.GenreViewSet)
+router.register(r'movies', views.MovieViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls))
