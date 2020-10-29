@@ -188,3 +188,29 @@ class ListAPIViewTest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEquals(List.objects.count(), 0)
 
+    def test_remove_movie_from_list(self):
+        url = reverse('list-delete-movie', args=[1])
+        data = {"movies": [1]}
+        response = self.client.post(url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.list.refresh_from_db()
+        self.assertEquals(
+            self.list.movies.count(),
+            0
+        )
+    
+    def test_add_movie_from_list(self):
+        url = reverse('movie-list')
+        data = {"title": "Test Movie 2", "tagline": "Test", "overview": "overview", "release_date": "2020-10-12",
+                "poster_url": "poster.jpg", "backdrop_url": "background.jpg", "imdb_id": "1", "genres": [reverse('genre-detail', args=[1])]}
+        response = self.client.post(url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        url = reverse('list-add-movie', args=[1])
+        data = {"movies": [2]}
+        response = self.client.post(url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.list.refresh_from_db()
+        self.assertEquals(
+            self.list.movies.count(),
+            2
+        )
