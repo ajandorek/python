@@ -29,6 +29,12 @@ class Movie(models.Model):
     def __str__(self):
         return f'{self.title}'
 
+class Video(models.Model):
+    size = models.IntegerField()
+    type = models.CharField(max_length=50)
+    url = models.CharField(max_length=100)
+    movie = models.ForeignKey(Movie, on_delete=models.PROTECT, related_name='movie', null=True)
+
 class List(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=100)

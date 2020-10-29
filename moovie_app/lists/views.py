@@ -8,8 +8,8 @@ from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
 from json import dumps, loads, JSONEncoder
 
-from lists.serializers import GenreSerializer, MovieSerializer, CreateUserSerializer, GetUsersSerializers, ListSerializer
-from lists.models import Genre, Movie, List
+from lists.serializers import GenreSerializer, MovieSerializer, CreateUserSerializer, GetUsersSerializers, ListSerializer, VideoSerializer
+from lists.models import Genre, Movie, List, Video
 
 # Create your views here.
 
@@ -19,6 +19,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
 
 class MovieViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -41,18 +42,28 @@ class MovieViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(title__contains=title)
         return queryset
 
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     queryset = get_user_model().objects.all()
     serializer_class = GetUsersSerializers
 
+
 class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = CreateUserSerializer
 
+
+class VideoViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer
+
+
 class ListViewSet(viewsets.ModelViewSet):
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     queryset = List.objects.all()
     serializer_class = ListSerializer
