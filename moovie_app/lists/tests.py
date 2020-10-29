@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from lists.models import Genre, Movie
+from lists.models import Genre, Movie, List
 from django.contrib.auth.models import User
 from lists.views import GenreViewSet
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
@@ -129,4 +129,62 @@ class MovieAPIViewTest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         data = response_json['results'][0]
         self.assertEquals(data['title'], self.movie.title)
+
+# List test
+
+class ListTestCase(TestCase):
+    def test_list(self):
+        self.assertEquals(Genre.objects.count(), 0)
+        genre = baker.make(Genre, name='Action')
+        movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
+                   poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[genre])
+        baker.make(List, name='Test List', description='Test Description', public=True, movies=[movie])
+        self.assertEquals(List.objects.count(), 1)
+        
+
+
+class ListAPIViewTest(APITestCase):
+    def setUp(self) -> None:
+        self.url = reverse('list-list')
+        self.genre = baker.make(Genre, name='Comedy')
+        self.movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
+                                poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[self.genre])
+        self.user = baker.make(User, username='username', email=email, password='username')
+        self.list = baker.make(List, name='Test List', description='Test Description', public=True, movies=[self.movie])
+        self.client.force_authenticate(user=self.user)
+
+    def test_list_create_api(self):
+        self.assertEquals(List.objects.count(), 1)
+        data = {"name": "Test List 2", "description": "Test Desc 2", "public": True, "movies": [reverse('genre-detail', args=[1])]}
+        response = self.client.post(self.url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertEquals(List.objects.count(), 2)
+
+    def test_get_list(self):
+        response = self.client.get(self.url)
+        response_json = response.json()
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        data = response_json['results'][0]
+        self.assertEquals(data['name'], self.list.name)
+
+    def test_update_list(self):
+        url = reverse('list-detail', args=[1])
+        data = {"name": "Test List 3"}
+        response = self.client.patch(url, data=data, format='json')
+        self.assertEquals(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.list.refresh_from_db()
+        self.assertEquals(
+            self.list.name,
+            data['name']
+        )
+
+    def test_delete_list(self):
+        self.assertEquals(List.objects.count(), 1)
+        url = reverse('list-detail', args=[1])
+        response = self.client.delete(url)
+        self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEquals(List.objects.count(), 0)
 
