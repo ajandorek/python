@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from lists.models import Genre, Movie, List
-from django.contrib.auth.models import User
+from lists.models import Genre, Movie, List, MoovieUser
 from lists.views import GenreViewSet
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 from rest_framework.views import status
@@ -26,7 +25,7 @@ class GenreAPIViewTest(APITestCase):
     def setUp(self) -> None:
         self.url = reverse('genre-list')
         self.genre = baker.make(Genre, name='Comedy')
-        self.user = baker.make(User, username='username', email=email, password='username')
+        self.user = baker.make(MoovieUser, email=email, password='username')
         self.client.force_authenticate(user=self.user)
 
     def test_genre_create_api(self):
@@ -83,7 +82,7 @@ class MovieAPIViewTest(APITestCase):
         self.genre = baker.make(Genre, name='Comedy')
         self.movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
                                 poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[self.genre])
-        self.user = baker.make(User, username='username', email=email, password='username')
+        self.user = baker.make(MoovieUser, email=email, password='username')
         self.client.force_authenticate(user=self.user)
 
     def test_movie_create_api(self):
@@ -149,7 +148,7 @@ class ListAPIViewTest(APITestCase):
         self.genre = baker.make(Genre, name='Comedy')
         self.movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
                                 poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[self.genre])
-        self.user = baker.make(User, username='username', email=email, password='username')
+        self.user = baker.make(MoovieUser, email=email, password='username')
         self.list = baker.make(List, name='Test List', description='Test Description', public=True, movies=[self.movie])
         self.client.force_authenticate(user=self.user)
 
