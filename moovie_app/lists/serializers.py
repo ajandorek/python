@@ -12,7 +12,6 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MovieSerializer(serializers.HyperlinkedModelSerializer):
-    genres = GenreSerializer(many=True)
     class Meta:
         model = Movie
         fields = ('id', 'title', 'tagline', 'overview', 'release_date',
@@ -48,15 +47,12 @@ class GetUsersSerializers(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'full_name', 'email', 'photo_path']
 
 class VideoSerializer(serializers.HyperlinkedModelSerializer):
-    movie = MovieSerializer(many=True)
     class Meta:
         model = Video
         fields = ['size', 'type', 'url', 'movie']
 
 class ListSerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.ReadOnlyField(default=serializers.CreateOnlyDefault(serializers.CurrentUserDefault()))
-
-    movies = MovieSerializer(many=True)
     class Meta:
         model = List
         fields = ('name', 'description', 'public', 'owner', 'movies',)
+        extra_kwargs = {"owner": {"read_only": True}}

@@ -81,10 +81,14 @@ class VideoViewSet(viewsets.ModelViewSet):
 
 
 class ListViewSet(viewsets.ModelViewSet):
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     queryset = List.objects.all()
     serializer_class = ListSerializer
+
+    def perform_create(self, serializer):
+        owner = MoovieUser.objects.filter(id = self.request.user.id).first()
+        serializer.save(owner=owner)
 
     @action(detail=True, methods=['post'])
     def delete_movie(self, request, pk):
