@@ -7,8 +7,8 @@ from lists import views
 router = DefaultRouter()
 router.register(r'genres', views.GenreViewSet)
 router.register(r'movies', views.MovieViewSet)
-router.register(r'users', views.UserViewSet)
 router.register(r'sign_up', views.CreateUserViewSet)
+router.register(r'users', views.UserViewSet)
 router.register(r'lists', views.ListViewSet)
 router.register(r'videos', views.VideoViewSet)
 

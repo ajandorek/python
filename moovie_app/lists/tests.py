@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from lists.models import Genre, Movie, List
-from django.contrib.auth.models import User
+from lists.models import Genre, Movie, List, MoovieUser
 from lists.views import GenreViewSet
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 from rest_framework.views import status
@@ -26,7 +25,7 @@ class GenreAPIViewTest(APITestCase):
     def setUp(self) -> None:
         self.url = reverse('genre-list')
         self.genre = baker.make(Genre, name='Comedy')
-        self.user = baker.make(User, username='username', email=email, password='username')
+        self.user = baker.make(MoovieUser, email=email, password='username')
         self.client.force_authenticate(user=self.user)
 
     def test_genre_create_api(self):
@@ -83,7 +82,7 @@ class MovieAPIViewTest(APITestCase):
         self.genre = baker.make(Genre, name='Comedy')
         self.movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
                                 poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[self.genre])
-        self.user = baker.make(User, username='username', email=email, password='username')
+        self.user = baker.make(MoovieUser, email=email, password='username')
         self.client.force_authenticate(user=self.user)
 
     def test_movie_create_api(self):
@@ -149,7 +148,7 @@ class ListAPIViewTest(APITestCase):
         self.genre = baker.make(Genre, name='Comedy')
         self.movie = baker.make(Movie, title='Test Movie', tagline='Test', overview='overview', release_date='2020-10-12',
                                 poster_url='poster.jpg', backdrop_url='background.jpg', imdb_id=1, genres=[self.genre])
-        self.user = baker.make(User, username='username', email=email, password='username')
+        self.user = baker.make(MoovieUser, email=email, password='username')
         self.list = baker.make(List, name='Test List', description='Test Description', public=True, movies=[self.movie])
         self.client.force_authenticate(user=self.user)
 
@@ -213,4 +212,69 @@ class ListAPIViewTest(APITestCase):
         self.assertEquals(
             self.list.movies.count(),
             2
+        )
+
+# User Tests
+
+class UserAPIViewTest(APITestCase):
+    def setUp(self) -> None:
+        self.url = reverse('moovieuser-list')
+        self.user = baker.make(MoovieUser, email=email, password='username', full_name='test user', photo_path='photo.jpg', lists=[])
+        self.client.force_authenticate(user=self.user)
+
+    def test_user_create_user(self):
+        self.assertEquals(MoovieUser.objects.count(), 1)
+        data = {"email": "test@test.com", "password":"password", "full_name":"Test User", "photo_path":"photo2.jpg"}
+        response = self.client.post(self.url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertEquals(MoovieUser.objects.count(), 2)
+
+    def test_get_user(self):
+        response = self.client.get(self.url)
+        response_json = response.json()
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        data = response_json['results'][0]
+        self.assertEquals(data['email'], self.user.email)
+
+    def test_update_user(self):
+        url = reverse('moovieuser-detail', args=[1])
+        data = {"full_name": "Test Name"}
+        response = self.client.patch(url, data=data, format='json')
+        self.assertEquals(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.user.refresh_from_db()
+        self.assertEquals(
+            self.user.full_name,
+            data['full_name']
+        )
+
+    def test_delete_user(self):
+        self.assertEquals(MoovieUser.objects.count(), 1)
+        url = reverse('moovieuser-detail', args=[1])
+        response = self.client.delete(url)
+        self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEquals(MoovieUser.objects.count(), 0)
+
+    def test_remove_profile_photo(self):
+        url = reverse('moovieuser-delete-profile-photo', args=[1])
+        data = {"movies": [1]}
+        response = self.client.post(url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEquals(
+            self.user.photo_path,
+            ''
+        )
+    
+    def test_update_profile_photo(self):
+        url = reverse('moovieuser-update-profile-photo', args=[1])
+        data = {"photo_path": "new_path.png"}
+        response = self.client.put(url, data=data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEquals(
+            self.user.photo_path,
+            "new_path.png"
         )

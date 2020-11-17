@@ -4,12 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 import django_filters.rest_framework
 from rest_framework import filters, mixins
-from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
 from json import dumps, loads, JSONEncoder
 
 from lists.serializers import GenreSerializer, MovieSerializer, CreateUserSerializer, GetUsersSerializers, ListSerializer, VideoSerializer
-from lists.models import Genre, Movie, List, Video
+from lists.models import Genre, Movie, List, Video, MoovieUser
 
 # Create your views here.
 
@@ -43,15 +42,34 @@ class MovieViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    queryset = get_user_model().objects.all()
+    queryset = MoovieUser.objects.all()
     serializer_class = GetUsersSerializers
+
+    @action(detail=True, methods=['post'])
+    def delete_profile_photo(self, request, pk):
+        current_user = self.get_object()
+        current_user.photo_path = ''
+        current_user.save()
+        serializer = self.get_serializer(current_user)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['put'])
+    def update_profile_photo(self, request, pk):
+        current_user = self.get_object()
+        photo_path = request.data["photo_path"]
+        current_user.photo_path = photo_path
+        current_user.save()
+        serializer = self.get_serializer(current_user)
+
+        return Response(serializer.data)
 
 
 class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset = get_user_model().objects.all()
+    queryset = MoovieUser.objects.all()
     serializer_class = CreateUserSerializer
 
 
@@ -67,6 +85,10 @@ class ListViewSet(viewsets.ModelViewSet):
 
     queryset = List.objects.all()
     serializer_class = ListSerializer
+
+    def perform_create(self, serializer):
+        owner = MoovieUser.objects.filter(id = self.request.user.id).first()
+        serializer.save(owner=owner)
 
     @action(detail=True, methods=['post'])
     def delete_movie(self, request, pk):
