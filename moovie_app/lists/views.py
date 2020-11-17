@@ -2,9 +2,12 @@ from django.shortcuts import render
 from rest_framework import permissions, renderers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import django_filters.rest_framework
+from rest_framework import filters
 
-from lists.serializers import GenreSerializer
-from lists.models import Genre
+
+from lists.serializers import GenreSerializer, MovieSerializer
+from lists.models import Genre, Movie
 
 # Create your views here.
 
@@ -12,4 +15,22 @@ from lists.models import Genre
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    
+
+class MovieViewSet(viewsets.ModelViewSet):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+    filter_backends = [filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend]
+    ordering_fields = ['title', 'genres__name', 'imdb_id']
+    search_fields = ['title', 'genres__name']
+
+    def get_queryset(self):
+        queryset = Movie.objects.all()
+        genres = self.request.query_params.get('genres', None)
+        title = self.request.query_params.get('title', None)
+        if genres is not None:
+            queryset = queryset.filter(genres__name=genres)
+        elif title is not None:
+            queryset = queryset.filter(title__contains=title)
+        return queryset
