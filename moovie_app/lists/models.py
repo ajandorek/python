@@ -14,7 +14,7 @@ class Genre(models.Model):
 
 
 class Movie(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
     tagline = models.CharField(max_length=100)
     overview = models.CharField(max_length=250, blank=True)
     release_date = models.DateField()
@@ -27,4 +27,22 @@ class Movie(models.Model):
         ordering = ('id', )
 
     def __str__(self):
-        return f'{self.title}{self.id}{self.genre}{self.imdb_id}'
+        return f'{self.title}'
+
+class Video(models.Model):
+    size = models.IntegerField()
+    type = models.CharField(max_length=50)
+    url = models.CharField(max_length=100)
+    movie = models.ForeignKey(Movie, on_delete=models.PROTECT, related_name='movie', null=True)
+
+class List(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=100)
+    public = models.BooleanField()
+    movies = models.ManyToManyField(Movie)
+
+    class Meta:
+        ordering = ('id', )
+
+    def __str__(self):
+        return f'{self.name}'

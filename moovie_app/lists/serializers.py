@@ -2,7 +2,7 @@ from rest_framework import serializers, validators
 from django.contrib.auth import get_user_model, models
 from django.core.mail import send_mail
 
-from lists.models import Genre, Movie
+from lists.models import Genre, Movie, List, Video
 
 
 class GenreSerializer(serializers.HyperlinkedModelSerializer):
@@ -12,6 +12,7 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MovieSerializer(serializers.HyperlinkedModelSerializer):
+    genres = GenreSerializer(many=True, read_only=True)
     class Meta:
         model = Movie
         fields = ('id', 'title', 'tagline', 'overview', 'release_date',
@@ -46,3 +47,15 @@ class GetUsersSerializers(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.User
         fields = ['id', 'username', 'email']
+
+class VideoSerializer(serializers.HyperlinkedModelSerializer):
+    movie = MovieSerializer(read_only=True)
+    class Meta:
+        model = Video
+        fields = ['size', 'type', 'url', 'movie']
+
+class ListSerializer(serializers.HyperlinkedModelSerializer):
+    movies = MovieSerializer(many=True, read_only=True)
+    class Meta:
+        model = List
+        fields = ['name', 'description', 'public', 'movies']
